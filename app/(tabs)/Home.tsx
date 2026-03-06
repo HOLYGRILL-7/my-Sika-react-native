@@ -66,7 +66,7 @@ const Home = () => {
                         </View>
 
                         {/* Categories */}
-                        <ScrollView
+                        {/* <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             style={{maxHeight: 45}}
@@ -85,7 +85,7 @@ const Home = () => {
                                     </TouchableOpacity>
                                 ))}
                             </View>
-                        </ScrollView>
+                        </ScrollView> */}
 
                         {/* Recent transactions header */}
                         <View className="mt-10 flex-row justify-between items-center mb-5">
