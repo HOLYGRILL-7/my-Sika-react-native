@@ -27,7 +27,6 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
             category,
             date: new Date().toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric"}),
             time: new Date().toLocaleTimeString("en-US", {hour: "2-digit", minute: "2-digit"}),
-            raw: "",
         });
 
         // Reset
@@ -45,23 +44,23 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
                 <TouchableOpacity className="flex-1 bg-black/40" activeOpacity={1} onPress={onClose} />
 
                 {/* Sheet */}
-                <View className="bg-white rounded-t-3xl px-6 pt-5 pb-10">
+                <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-5 pb-10">
                     {/* Handle */}
                     <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-5" />
 
                     {/* Header */}
                     <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-xl font-bold text-gray-900">Add Transaction</Text>
+                        <Text className="text-xl font-bold text-gray-900 dark:text-white">Add Transaction</Text>
                         <TouchableOpacity onPress={onClose}>
                             <X size={22} color="#999" />
                         </TouchableOpacity>
                     </View>
 
                     {/* Credit / Debit toggle */}
-                    <View className="flex-row bg-gray-100 rounded-2xl p-1 mb-5">
+                    <View className="flex-row bg-gray-100 dark:bg-zinc-800 rounded-2xl p-1 mb-5">
                         <TouchableOpacity
                             className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl ${
-                                type === "debit" ? "bg-white" : ""
+                                type === "debit" ? "bg-white dark:bg-zinc-700" : ""
                             }`}
                             onPress={() => setType("debit")}
                         >
@@ -76,7 +75,7 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl ${
-                                type === "credit" ? "bg-white" : ""
+                                type === "credit" ? "bg-white dark:bg-zinc-700" : ""
                             }`}
                             onPress={() => setType("credit")}
                         >
@@ -95,13 +94,13 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
                     <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                         {type === "debit" ? "Sent To" : "Received From"}
                     </Text>
-                    <View className="bg-gray-50 rounded-2xl px-4 py-3 mb-4">
+                    <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-3 mb-4">
                         <TextInput
                             placeholder="e.g. Ama Mensah"
-                            placeholderTextColor="#bbb"
+                            placeholderTextColor="#777"
                             value={name}
                             onChangeText={setName}
-                            className="text-base text-gray-900"
+                            className="text-base text-gray-900 dark:text-white"
                         />
                     </View>
 
@@ -109,14 +108,14 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
                     <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                         Amount (₵)
                     </Text>
-                    <View className="bg-gray-50 rounded-2xl px-4 py-3 mb-4">
+                    <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-3 mb-4">
                         <TextInput
                             placeholder="0.00"
-                            placeholderTextColor="#bbb"
+                            placeholderTextColor="#777"
                             value={amount}
                             onChangeText={setAmount}
                             keyboardType="numeric"
-                            className="text-base text-gray-900"
+                            className="text-base text-gray-900 dark:text-white"
                         />
                     </View>
 
@@ -129,7 +128,7 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
                                     key={c}
                                     onPress={() => setCategory(c)}
                                     className={`px-4 py-2 rounded-full border ${
-                                        category === c ? "bg-green-700 border-green-700" : "bg-white border-gray-200"
+                                        category === c ? "bg-green-700 border-green-700 dark:bg-green-600 dark:border-green-600" : "bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800"
                                     }`}
                                 >
                                     <Text
@@ -147,8 +146,7 @@ const AddTransactionModal = ({visible, onClose, onAdd}: Props) => {
                     {/* Add Button */}
                     <TouchableOpacity
                         onPress={handleAdd}
-                        className="rounded-2xl py-4 items-center"
-                        style={{backgroundColor: !name || !amount ? "#ccc" : "#2e7d32"}}
+                        className={`rounded-2xl py-4 items-center ${!name || !amount ? 'bg-[#ccc]' : 'bg-[#2e7d32]'}`}
                         disabled={!name || !amount}
                     >
                         <Text className="text-white font-bold text-base">Add Transaction</Text>

@@ -8,9 +8,9 @@ const Signup = () => {
     const router = useRouter();
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50 relative">
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950 relative">
             <View
-                className="absolute top-0 right-0 w-[35em] h-[25em] bg-yellow-200 rounded-full opacity-40"
+                className="absolute top-0 right-0 w-[35em] h-[25em] bg-yellow-200 dark:bg-yellow-900/10 rounded-full opacity-40"
                 style={{transform: [{translateX: 40}, {translateY: -40}]}}
             />
             <View className="mt-24">
@@ -22,30 +22,31 @@ const Signup = () => {
                 </View>
             </View>
             <View className="w-full  mt-5 gap-2">
-                <Text className="font-bold text-4xl text-center">Create Account</Text>
-                <Text className="text-gray-500 text-center px-6">Join Sika to manage your money smartly</Text>
+                <Text className="font-bold text-4xl text-center dark:text-white">Create Account</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-center px-6">Join Sika to manage your money smartly</Text>
             </View>
-            <View className="mt-14 bg-white mx-5 shadow-xl rounded-3xl">
+            <View className="mt-14 bg-white dark:bg-zinc-900 mx-5 shadow-xl rounded-3xl">
                 <View className="main-container p-5">
                     <View className="mb-10">
-                        <Text className="font-semibold text-lg mb-2">Full Name</Text>
-                        <View className="flex-row items-center bg-green-100/10 rounded-xl px-3 gap-3">
-                            <User color="gray" size={20} />
-                            <TextInput className="flex-1 py-3" placeholder="e.g. John Doe" />
+                        <Text className="font-semibold text-lg mb-2 dark:text-white">Full Name</Text>
+                        <View className="flex-row items-center bg-green-100/10 dark:bg-zinc-800 rounded-xl px-3 gap-3">
+                            <User color="#777" size={20} />
+                            <TextInput className="flex-1 py-3 dark:text-white" placeholder="e.g. John Doe" placeholderTextColor="#777" />
                         </View>
                     </View>
                     <View className="mb-10">
-                        <Text className="font-semibold text-lg mb-2">Phone Number</Text>
-                        <View className="flex-row items-center bg-green-100/10 rounded-xl px-3 gap-3">
+                        <Text className="font-semibold text-lg mb-2 dark:text-white">Phone Number</Text>
+                        <View className="flex-row items-center bg-green-100/10 dark:bg-zinc-800 rounded-xl px-3 gap-3">
                             {/* Country code */}
-                            <TouchableOpacity className="flex-row items-center gap-1 border-r border-gray-200 pr-3">
+                            <TouchableOpacity className="flex-row items-center gap-1 border-r border-gray-200 dark:border-zinc-700 pr-3">
                                 <Text className="text-lg">🇬🇭</Text>
-                                <Text className="text-gray-600 font-semibold">+233</Text>
+                                <Text className="text-gray-600 dark:text-gray-400 font-semibold">+233</Text>
                             </TouchableOpacity>
                             {/* Number input */}
                             <TextInput
-                                className="flex-1 py-3"
+                                className="flex-1 py-3 dark:text-white"
                                 placeholder="XX XXX XXXX"
+                                placeholderTextColor="#777"
                                 keyboardType="phone-pad"
                                 maxLength={9}
                             />
@@ -53,32 +54,32 @@ const Signup = () => {
                     </View>
 
                     <View className="mb-10">
-                        <Text className="font-semibold text-lg mb-2">Create Pin</Text>
-                        <View className="flex-row items-center bg-green-100/10 rounded-xl px-3 gap-3">
-                            <LockKeyhole color="gray" size={20} />
-                            <TextInput className="flex-1 py-3" placeholder="Create a 4-digit pin" />
-                            <EyeOff color="gray" size={20} />
+                        <Text className="font-semibold text-lg mb-2 dark:text-white">Create Pin</Text>
+                        <View className="flex-row items-center bg-green-100/10 dark:bg-zinc-800 rounded-xl px-3 gap-3">
+                            <LockKeyhole color="#777" size={20} />
+                            <TextInput className="flex-1 py-3 dark:text-white" placeholder="Create a 4-digit pin" placeholderTextColor="#777" />
+                            <EyeOff color="#777" size={20} />
                         </View>
                     </View>
 
                     <View className="mb-10">
-                        <Text className="font-semibold text-lg mb-2">Create Pin</Text>
-                        <View className="flex-row items-center bg-green-100/10 rounded-xl px-3 gap-3">
-                            <LockKeyhole color="gray" size={20} />
-                            <TextInput className="flex-1 py-3" placeholder="Create a 4-digit pin" />
-                            <EyeOff color="gray" size={20} />
+                        <Text className="font-semibold text-lg mb-2 dark:text-white">Confirm Pin</Text>
+                        <View className="flex-row items-center bg-green-100/10 dark:bg-zinc-800 rounded-xl px-3 gap-3">
+                            <LockKeyhole color="#777" size={20} />
+                            <TextInput className="flex-1 py-3 dark:text-white" placeholder="Confirm your 4-digit pin" placeholderTextColor="#777" />
+                            <EyeOff color="#777" size={20} />
                         </View>
                     </View>
 
-                    <TouchableOpacity className="bg-green-900 py-4 rounded-xl mt-5" onPress={() => router.push("/(tabs)/Home")}>
+                    <TouchableOpacity className="bg-green-900 dark:bg-green-700 py-4 rounded-xl mt-5" onPress={() => router.push("/(tabs)/home")}>
                         <Text className="text-white text-center font-bold">Sign Up</Text>
                     </TouchableOpacity>
                 </View>
             </View>
             <View className="flex-row justify-center items-center mt-5">
-                <Text className="text-gray-500">Already have an account? </Text>
-                <TouchableOpacity onPress={() => router.push("/login")}>
-                    <Text className="text-green-900 font-bold">Log in</Text>
+                <Text className="text-gray-500 dark:text-gray-400">Already have an account? </Text>
+                <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+                    <Text className="text-green-900 dark:text-green-400 font-bold">Log in</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

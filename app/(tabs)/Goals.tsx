@@ -2,82 +2,34 @@ import React, {useState} from "react";
 import {Text, View, ScrollView, TouchableOpacity} from "react-native";
 import {Plus, Calendar, GraduationCap, Smartphone, Shield} from "lucide-react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import AddGoalModal from "../../components/AddgoalModal";
+import AddGoalModal from "../../components/AddGoalModal";
 
-type Goal = {
-    id: string;
-    name: string;
-    saved: number;
-    target: number;
-    deadline: string;
-    status: "On Track" | "Behind";
-    icon: "school" | "phone" | "shield";
-};
+import { useGoals } from "../../context/GoalContext";
 
-const mockGoals: Goal[] = [
-    {
-        id: "1",
-        name: "School Fees",
-        saved: 1350,
-        target: 2000,
-        deadline: "Apr 30, 2026",
-        status: "On Track",
-        icon: "school",
-    },
-    {
-        id: "2",
-        name: "New Phone",
-        saved: 400,
-        target: 1500,
-        deadline: "Jun 15, 2026",
-        status: "Behind",
-        icon: "phone",
-    },
-    {
-        id: "3",
-        name: "Emergency Fund",
-        saved: 800,
-        target: 5000,
-        deadline: "Dec 31, 2026",
-        status: "On Track",
-        icon: "shield",
-    },
-    {
-        id: "4",
-        name: "Vacation Fund",
-        saved: 200,
-        target: 3000,
-        deadline: "Aug 20, 2026",
-        status: "Behind",
-        icon: "shield",
-    },
-];
-
-const totalSaved = mockGoals.reduce((sum, g) => sum + g.saved, 0);
-
-const GoalIcon = ({icon}: {icon: Goal["icon"]}) => {
+const GoalIcon = ({icon}: {icon: string}) => {
     if (icon === "school") return <GraduationCap size={20} color="#2d6a2d" />;
     if (icon === "phone") return <Smartphone size={20} color="#2d6a2d" />;
     return <Shield size={20} color="#2d6a2d" />;
 };
 
 const Goals = () => {
-    // const [goals] = useState<Goal[]>(mockGoals);
-    const [goals, setGoals] = useState<Goal[]>(mockGoals);
+    const { goals, addGoal } = useGoals();
     const [showModal, setShowModal] = useState(false);
 
+    const totalSaved = goals.reduce((sum, g) => sum + g.saved, 0);
+
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 100}}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950">
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 100}} className="dark:bg-zinc-950">
                 {/* Header */}
                 <View className="px-6 pt-4 pb-2 flex-row justify-between items-center">
-                    <Text className="text-2xl font-bold text-gray-900">Savings Goals</Text>
+                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">Savings Goals</Text>
                 </View>
 
                 {/* Total Saved Card */}
-                <View className="mx-6 mt-4 rounded-2xl p-6" style={{backgroundColor: "#e8f5e9"}}>
-                    <Text className="text-sm font-semibold text-gray-500 text-center">Total Saved</Text>
-                    <Text className="text-4xl font-bold text-green-700 text-center mt-1">
+                <View className="mx-6 mt-4 rounded-2xl p-6 bg-[#e8f5e9] dark:bg-green-900/20">
+                    <Text className="text-sm font-semibold text-gray-500 dark:text-green-400 text-center">Total Saved</Text>
+                    <Text className="text-4xl font-bold text-green-700 dark:text-white text-center mt-1">
                         ₵{totalSaved.toLocaleString()}.00
                     </Text>
                 </View>
@@ -91,19 +43,19 @@ const Goals = () => {
                         return (
                             <View
                                 key={goal.id}
-                                className="bg-white rounded-2xl p-5"
+                                className="bg-white dark:bg-zinc-900 rounded-2xl p-5"
                                 style={{elevation: 2, shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 8}}
                             >
                                 {/* Goal header */}
                                 <View className="flex-row items-center justify-between mb-3">
                                     <View className="flex-row items-center gap-3">
-                                        <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
+                                        <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
                                             <GoalIcon icon={goal.icon} />
                                         </View>
-                                        <Text className="text-base font-bold text-gray-900">{goal.name}</Text>
+                                        <Text className="text-base font-bold text-gray-900 dark:text-white">{goal.name}</Text>
                                     </View>
                                     <View
-                                        className="px-3 py-1 rounded-full"
+                                        className="px-3 py-1 rounded-full bg-opacity-100 dark:bg-opacity-20"
                                         style={{backgroundColor: goal.status === "On Track" ? "#e8f5e9" : "#fff3e0"}}
                                     >
                                         <Text
@@ -117,14 +69,14 @@ const Goals = () => {
 
                                 {/* Amounts */}
                                 <View className="flex-row justify-between mb-2">
-                                    <Text className="text-base font-bold text-gray-900">
+                                    <Text className="text-base font-bold text-gray-900 dark:text-white">
                                         ₵{goal.saved.toLocaleString()}.00
                                     </Text>
-                                    <Text className="text-sm text-gray-400">₵{goal.target.toLocaleString()}.00</Text>
+                                    <Text className="text-sm text-gray-400 dark:text-gray-500">₵{goal.target.toLocaleString()}.00</Text>
                                 </View>
 
                                 {/* Progress bar */}
-                                <View className="h-2 bg-orange-100 rounded-full overflow-hidden">
+                                <View className="h-2 bg-orange-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                     <View
                                         className="h-2 rounded-full"
                                         style={{
@@ -164,7 +116,7 @@ const Goals = () => {
                 visible={showModal}
                 onClose={() => setShowModal(false)}
                 onAdd={(g) => {
-                    setGoals((prev) => [g, ...prev]);
+                    addGoal(g);
                     setShowModal(false);
                 }}
             />

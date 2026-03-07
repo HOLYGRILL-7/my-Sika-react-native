@@ -1,37 +1,51 @@
 import {ArrowDownLeft, ArrowUpRight, Phone, ShoppingCart, Zap} from "lucide-react-native";
-import React from "react";
-import {FlatList, Image, ScrollView, Text, TouchableOpacity, View} from "react-native";
+import React, { useState, useCallback } from "react";
+import {FlatList, Image, Text, TouchableOpacity, View, RefreshControl} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
+import { useTransactions } from "../../context/TransactionContext";
 
 const Home = () => {
-    const transactions = [
-        {
-            id: "1",
-            name: "From Kwame Asante",
-            date: "Feb 20, 2026",
-            amount: "+₵500.00",
-            type: "credit",
-            icon: ArrowUpRight,
-        },
+    const [refreshing, setRefreshing] = useState(false);
+    const { transactions } = useTransactions();
 
-        {id: "2", name: "To Ama Mensah", date: "Feb 19, 2026", amount: "-₵120.00", type: "debit", icon: ArrowDownLeft},
-        {id: "3", name: "Electricity", date: "Feb 18, 2026", amount: "-₵85.00", type: "debit", icon: Zap},
-        {id: "4", name: "Airtime", date: "Feb 17, 2026", amount: "-₵20.00", type: "debit", icon: Phone},
-        {id: "5", name: "Groceries", date: "Feb 15, 2026", amount: "-₵340.00", type: "debit", icon: ShoppingCart},
-    ];
+    const totalSpent = transactions
+        .filter((t) => t.type === "debit")
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalCashFlow = transactions
+        .reduce((sum, t) => sum + (t.type === "credit" ? t.amount : -t.amount), 0);
+    
+    const totalReceived = transactions
+        .filter((t) => t.type === "credit")
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const formatCurrency = (amount: number) => {
+        return amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        // Simulate a network request
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1500);
+    }, []);
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
             <FlatList
-                data={transactions}
+                data={transactions.slice(0, 5)}
                 keyExtractor={(item) => item.id}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2e7d32" colors={["#2e7d32"]} />
+                }
                 contentContainerStyle={{padding: 20}}
                 ListHeaderComponent={() => (
                     <>
                         {/* Greeting */}
                         <View className="mt-5">
-                            <Text className="text-2xl font-bold">Good morning, Kofi!</Text>
-                            <Text className="text-gray-500">{"Let's track your money."}</Text>
+                            <Text className="text-2xl font-bold dark:text-white">Good morning, Kofi!</Text>
+                            <Text className="text-gray-500 dark:text-gray-400">{"Let's track your money."}</Text>
                             <Image
                                 source={require("../../assets/images/Me.png")}
                                 className="w-14 h-14 rounded-full absolute right-0 top-0"
@@ -39,76 +53,59 @@ const Home = () => {
                         </View>
 
                         {/* Balance card */}
-                        <View className="mt-10 p-6 rounded-xl overflow-hidden" style={{backgroundColor: "#d4e6d4"}}>
+                        <View className="mt-10 p-6 rounded-xl overflow-hidden bg-[#d4e6d4] dark:bg-green-900/30">
                             <View
-                                className="absolute right-0 top-0 w-40 h-40 rounded-full"
-                                style={{backgroundColor: "#c0d9c0", transform: [{translateX: 30}, {translateY: -20}]}}
+                                className="absolute right-0 top-0 w-40 h-40 rounded-full bg-[#c0d9c0] dark:bg-green-800/20 translate-x-[30px] -translate-y-[20px]"
                             />
-                            <Text className="text-green-900 font-bold text-lg">Total Balance</Text>
+                            <Text className="text-green-900 dark:text-green-400 font-bold text-lg">Total Cash Flow</Text>
                             <Text
                                 style={{fontFamily: "DMMono_400Regular"}}
-                                className="text-green-900 font-bold text-4xl mt-1"
+                                className="text-green-900 dark:text-white font-bold text-4xl mt-1"
                             >
-                                ₵ 12,000.00
+                                ₵ {formatCurrency(totalCashFlow)}
                             </Text>
                         </View>
 
                         {/* Stats */}
                         <View className="mt-10 flex-row gap-5">
-                            <View className="p-5 rounded-xl flex-1 bg-white border-2 border-gray-200">
-                                <Text className="mb-3">Total Spent This Month</Text>
-                                <Text className="text-red-500 font-bold">₵ 2,500.00</Text>
+                            <View className="p-5 rounded-xl flex-1 bg-white dark:bg-zinc-900 border-2 border-gray-200 dark:border-zinc-800">
+                                <Text className="mb-3 dark:text-gray-400">Total Spent This Month</Text>
+                                <Text className="text-red-500 font-bold">₵ {formatCurrency(totalSpent)}</Text>
                             </View>
-                            <View className="p-5 rounded-xl flex-1 bg-white border-2 border-gray-200">
-                                <Text className="mb-3">Total Saved This Month</Text>
-                                <Text className="text-green-500 font-bold">₵ 9,500.00</Text>
+                            <View className="p-5 rounded-xl flex-1 bg-white dark:bg-zinc-900 border-2 border-gray-200 dark:border-zinc-800">
+                                <Text className="mb-3 dark:text-gray-400">Total Recieved This Month</Text>
+                                <Text className="text-green-500 font-bold">₵ {formatCurrency(totalReceived)}</Text>
                             </View>
                         </View>
 
-                        {/* Categories */}
-                        {/* <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            style={{maxHeight: 45}}
-                            className="mt-4"
-                        >
-                            <View className="flex-row gap-3 px-1">
-                                {["Food", "Transport", "Utilities", "Other"].map((category) => (
-                                    <TouchableOpacity
-                                        key={category}
-                                        className="px-5 py-3 rounded-2xl"
-                                        style={{backgroundColor: "#f5e6c8"}}
-                                    >
-                                        <Text className="font-semibold" style={{color: "#8a6a2a"}}>
-                                            {category}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </ScrollView> */}
 
-                        {/* Recent transactions header */}
                         <View className="mt-10 flex-row justify-between items-center mb-5">
-                            <Text className="text-xl font-bold">Recent Transactions</Text>
+                            <Text className="text-xl font-bold dark:text-white">Recent Transactions</Text>
                             <TouchableOpacity>
-                                <Text className="text-green-900 font-semibold">See All</Text>
+                                <Text className="text-green-900 dark:text-green-400 font-semibold">See All</Text>
                             </TouchableOpacity>
                         </View>
                     </>
                 )}
                 renderItem={({item}) => {
-                    const IconComponent = item.icon;
+                    const getIcon = () => {
+                        if (item.category === "Utilities") return Zap;
+                        if (item.category === "Airtime") return Phone;
+                        if (item.category === "Food") return ShoppingCart;
+                        return item.type === "credit" ? ArrowDownLeft : ArrowUpRight;
+                    };
+                    const IconComponent = getIcon();
                     return (
                         <View className="flex-row items-center justify-between mb-5">
-                            <View className="w-12 h-12 rounded-full bg-green-100 mr-4 items-center justify-center">
-                                <IconComponent size={20} color={item.type === "credit" ? "green" : "gray"} />
+                            <View className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 mr-4 items-center justify-center">
+                                <IconComponent size={20} color={item.type === "credit" ? "#22c55e" : "#9ca3af"} />
                             </View>
                             <View className="flex-1">
-                                <Text className="font-bold">{item.name}</Text>
-                                <Text className="text-gray-400 text-sm">{item.date}</Text>
+                                <Text className="font-bold dark:text-white">{item.name}</Text>
+                                <Text className="text-gray-400 dark:text-gray-500 text-sm">{item.date}</Text>
                             </View>
                             <Text className={`font-bold ${item.type === "credit" ? "text-green-600" : "text-red-500"}`}>
-                                {item.amount}
+                                {item.type === "credit" ? "+" : "-"}₵{item.amount.toFixed(2)}
                             </Text>
                         </View>
                     );

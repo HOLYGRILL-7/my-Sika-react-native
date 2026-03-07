@@ -1,12 +1,19 @@
 import React, {useState} from "react";
-import {Text, View, ScrollView, TouchableOpacity, Image, Switch} from "react-native";
+import {Text, View, ScrollView, TouchableOpacity, Image, Switch, Alert} from "react-native";
 import {Camera, ChevronRight, Smartphone, Building2, Bell, DollarSign, Download, User, Moon, Trash2, Info} from "lucide-react-native";import {SafeAreaView} from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
+import { useColorScheme } from "nativewind";
+import { useTransactions } from "../../context/TransactionContext";
+import { useGoals } from "../../context/GoalContext";
+
+import Constants from "expo-constants";
 
 const Profile = () => {
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [smsEnabled, setSmsEnabled] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
+    const { colorScheme, toggleColorScheme } = useColorScheme();
+    const { clearTransactions } = useTransactions();
+    const { clearGoals } = useGoals();
 
     const pickImage = async () => {
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -25,8 +32,8 @@ const Profile = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
-            <ScrollView showsVerticalScrollIndicator={false}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950">
+            <ScrollView showsVerticalScrollIndicator={false} className="dark:bg-zinc-950">
                 {/* Header */}
                 {/* <View className="px-6 pt-4 pb-2">
                     <Text className="text-2xl font-bold text-gray-900">Profile</Text>
@@ -53,8 +60,8 @@ const Profile = () => {
                         </View>
                     </TouchableOpacity>
 
-                    <Text className="text-xl font-bold text-gray-900 mt-4">Kofi Mensah</Text>
-                    <Text className="text-sm text-gray-400 mt-1">kofi@gmail.com</Text>
+                    <Text className="text-xl font-bold text-gray-900 dark:text-white mt-4">Kofi Mensah</Text>
+                    <Text className="text-sm text-gray-400 dark:text-gray-500 mt-1">kofi@gmail.com</Text>
                 </View>
 
                 {/* Financial Details */}
@@ -63,17 +70,17 @@ const Profile = () => {
                         Financial Details
                     </Text>
                     <View
-                        className="bg-white rounded-2xl px-4"
+                        className="bg-white dark:bg-zinc-900 rounded-2xl px-4"
                         style={{elevation: 2, shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 8}}
                     >
                         {/* Primary Network */}
-                        <View className="flex-row items-center py-4 border-b border-gray-100 gap-3">
+                        <View className="flex-row items-center py-4 border-b border-gray-100 dark:border-zinc-800 gap-3">
                             <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
                                 <Smartphone size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">Primary Network</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">MTN Mobile Money</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Primary Network</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">MTN Mobile Money</Text>
                             </View>
                             <TouchableOpacity>
                                 <Text className="text-sm font-semibold text-green-700">Edit</Text>
@@ -86,8 +93,8 @@ const Profile = () => {
                                 <Building2 size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">Primary Bank</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Ecobank Ghana</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Primary Bank</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Ecobank Ghana</Text>
                             </View>
                             <TouchableOpacity>
                                 <Text className="text-sm font-semibold text-green-700">Edit</Text>
@@ -102,7 +109,7 @@ const Profile = () => {
                         Settings & Preferences
                     </Text>
                     <View
-                        className="bg-white rounded-2xl px-4"
+                        className="bg-white dark:bg-zinc-900 rounded-2xl px-4"
                         style={{elevation: 2, shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 8}}
                     >
                         {/* SMS Permissions */}
@@ -111,8 +118,8 @@ const Profile = () => {
                                 <Smartphone size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">SMS Permissions</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Auto-sync transactions</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">SMS Permissions</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Auto-sync transactions</Text>
                             </View>
                             <Switch
                                 value={smsEnabled}
@@ -123,13 +130,13 @@ const Profile = () => {
                         </View>
 
                         {/* Notifications */}
-                        <View className="flex-row items-center py-4 border-b border-gray-100 gap-3">
-                            <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
+                        <View className="flex-row items-center py-4 border-b border-gray-100 dark:border-zinc-800 gap-3">
+                            <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
                                 <Bell size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">Notifications</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Alerts and insights</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Alerts and insights</Text>
                             </View>
                             <ChevronRight size={18} color="#ccc" />
                         </View>
@@ -140,60 +147,77 @@ const Profile = () => {
                                 <DollarSign size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">Currency Display</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Ghana Cedis (₵)</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Currency Display</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Ghana Cedis (₵)</Text>
                             </View>
                             <ChevronRight size={18} color="#ccc" />
                         </View>
 
-                        {/* Export Data */}
-                        <View className="flex-row items-center py-4 gap-3">
-                            <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
-                                <Download size={18} color="#2d6a2d" />
+                            <View className="flex-row items-center py-4 border-b border-gray-100 dark:border-zinc-800 gap-3">
+                                <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
+                                    <Download size={18} color="#2d6a2d" />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="text-sm font-semibold text-gray-900 dark:text-white">Export Data</Text>
+                                    <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Download your transactions</Text>
+                                </View>
+                                <ChevronRight size={18} color="#ccc" />
                             </View>
-                            <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">Export Data</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Download your transactions</Text>
-                            </View>
-                            <ChevronRight size={18} color="#ccc" />
-                        </View>
-                        {/* Dark Mode */}
-                        <View className="flex-row items-center py-4 border-t border-gray-100 gap-3">
-                            <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
+                        <View className="flex-row items-center py-4 border-t border-gray-100 dark:border-zinc-800 gap-3">
+                            <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
                                 <Moon size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">Dark Mode</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Switch app theme</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Dark Mode</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Switch app theme</Text>
                             </View>
                             <Switch
-                                value={darkMode}
-                                onValueChange={setDarkMode}
+                                value={colorScheme === "dark"}
+                                onValueChange={toggleColorScheme}
                                 trackColor={{false: "#e0e0e0", true: "#a5d6a7"}}
-                                thumbColor={darkMode ? "#2e7d32" : "#fff"}
+                                thumbColor={colorScheme === "dark" ? "#2e7d32" : "#fff"}
                             />
                         </View>
 
                         {/* Clear Data */}
-                        <View className="flex-row items-center py-4 border-t border-gray-100 gap-3">
-                            <View className="w-9 h-9 rounded-xl bg-red-50 items-center justify-center">
-                                <Trash2 size={18} color="#c62828" />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-sm font-semibold text-red-600">Clear Data</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Reset all transactions</Text>
-                            </View>
-                            <ChevronRight size={18} color="#ccc" />
-                        </View>
+                            <TouchableOpacity 
+                                onPress={() => {
+                                    Alert.alert(
+                                        "Clear Data",
+                                        "Are you sure you want to reset all transactions and goals? This cannot be undone.",
+                                        [
+                                            { text: "Cancel", style: "cancel" },
+                                            { 
+                                                text: "Clear All", 
+                                                style: "destructive",
+                                                onPress: () => {
+                                                    clearTransactions();
+                                                    clearGoals();
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }}
+                                className="flex-row items-center py-4 border-t border-gray-100 dark:border-zinc-800 gap-3"
+                            >
+                                <View className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 items-center justify-center">
+                                    <Trash2 size={18} color="#c62828" />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="text-sm font-semibold text-red-600">Clear Data</Text>
+                                    <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Reset all transactions</Text>
+                                </View>
+                                <ChevronRight size={18} color="#ccc" />
+                            </TouchableOpacity>
 
                         {/* About */}
-                        <View className="flex-row items-center py-4 border-t border-gray-100 gap-3">
-                            <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
+                        <View className="flex-row items-center py-4 border-t border-gray-100 dark:border-zinc-800 gap-3">
+                            <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
                                 <Info size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900">About</Text>
-                                <Text className="text-xs text-gray-400 mt-0.5">Sika v1.0.0</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">About</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Sika v{Constants.expoConfig?.version || "1.0.0"}</Text>
                             </View>
                             <ChevronRight size={18} color="#ccc" />
                         </View>

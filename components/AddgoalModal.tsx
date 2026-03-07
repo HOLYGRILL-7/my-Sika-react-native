@@ -1,6 +1,7 @@
-import React, {useState} from "react";
-import {Text, View, TextInput, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, ScrollView} from "react-native";
-import {X, GraduationCap, Smartphone, Shield, Home, Car, Heart} from "lucide-react-native";
+import { Car, GraduationCap, Heart, Home, Shield, Smartphone, X } from "lucide-react-native";
+import React, { useState } from "react";
+import { KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useColorScheme } from "nativewind";
 
 type Props = {
     visible: boolean;
@@ -56,13 +57,13 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                 <TouchableOpacity className="flex-1 bg-black/40" activeOpacity={1} onPress={onClose} />
 
                 {/* Sheet */}
-                <View className="bg-white rounded-t-3xl px-6 pt-5 pb-10">
+                <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-5 pb-10">
                     {/* Handle */}
                     <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-5" />
 
                     {/* Header */}
                     <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-xl font-bold text-gray-900">New Goal</Text>
+                        <Text className="text-xl font-bold text-gray-900 dark:text-white">New Goal</Text>
                         <TouchableOpacity onPress={onClose}>
                             <X size={22} color="#999" />
                         </TouchableOpacity>
@@ -81,7 +82,7 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                                     <View
                                         className="w-12 h-12 rounded-2xl items-center justify-center"
                                         style={{
-                                            backgroundColor: selectedIcon === key ? "#2e7d32" : "#f0f0f0",
+                                            backgroundColor: selectedIcon === key ? "#2e7d32" : (useColorScheme().colorScheme === "dark" ? "#27272a" : "#f0f0f0"),
                                         }}
                                     >
                                         <Icon size={20} color={selectedIcon === key ? "white" : "#999"} />
@@ -95,13 +96,13 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                         <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                             Goal Name
                         </Text>
-                        <View className="bg-gray-50 rounded-2xl px-4 py-3 mb-4">
+                        <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-3 mb-4">
                             <TextInput
                                 placeholder="e.g. School Fees"
-                                placeholderTextColor="#bbb"
+                                placeholderTextColor="#777"
                                 value={name}
                                 onChangeText={setName}
-                                className="text-base text-gray-900"
+                                className="text-base text-gray-900 dark:text-white"
                             />
                         </View>
 
@@ -109,14 +110,14 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                         <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                             Target Amount (₵)
                         </Text>
-                        <View className="bg-gray-50 rounded-2xl px-4 py-3 mb-4">
+                        <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-3 mb-4">
                             <TextInput
                                 placeholder="0.00"
-                                placeholderTextColor="#bbb"
+                                placeholderTextColor="#777"
                                 value={target}
                                 onChangeText={setTarget}
                                 keyboardType="numeric"
-                                className="text-base text-gray-900"
+                                className="text-base text-gray-900 dark:text-white"
                             />
                         </View>
 
@@ -124,14 +125,14 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                         <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                             Already Saved (₵)
                         </Text>
-                        <View className="bg-gray-50 rounded-2xl px-4 py-3 mb-4">
+                        <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-3 mb-4">
                             <TextInput
                                 placeholder="0.00"
-                                placeholderTextColor="#bbb"
+                                placeholderTextColor="#777"
                                 value={saved}
                                 onChangeText={setSaved}
                                 keyboardType="numeric"
-                                className="text-base text-gray-900"
+                                className="text-base text-gray-900 dark:text-white"
                             />
                         </View>
 
@@ -139,13 +140,13 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                         <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                             Deadline
                         </Text>
-                        <View className="bg-gray-50 rounded-2xl px-4 py-3 mb-6">
+                        <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-3 mb-6">
                             <TextInput
                                 placeholder="e.g. Dec 31, 2026"
-                                placeholderTextColor="#bbb"
+                                placeholderTextColor="#777"
                                 value={deadline}
                                 onChangeText={setDeadline}
-                                className="text-base text-gray-900"
+                                className="text-base text-gray-900 dark:text-white"
                             />
                         </View>
 
