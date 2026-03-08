@@ -45,7 +45,7 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 34
+            "compileSdkVersion": 35
           }
         }
       ]
@@ -53,6 +53,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ecb34ade-c0d0-4528-a32c-a593db2ebfac"
+      }
     }
   }
 }

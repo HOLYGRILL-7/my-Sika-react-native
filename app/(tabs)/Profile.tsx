@@ -1,12 +1,17 @@
-import React, {useState} from "react";
-import {Text, View, ScrollView, TouchableOpacity, Image, Switch, Alert} from "react-native";
-import {Camera, ChevronRight, Smartphone, Building2, Bell, DollarSign, Download, User, Moon, Trash2, Info} from "lucide-react-native";import {SafeAreaView} from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
-import { useColorScheme } from "nativewind";
-import { useTransactions } from "../../context/TransactionContext";
-import { useGoals } from "../../context/GoalContext";
-
 import Constants from "expo-constants";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { Bell, Building2, Camera, ChevronRight, DollarSign, Download, Info, LogOut, Moon, Smartphone, Trash2, User } from "lucide-react-native";
+import { useColorScheme } from "nativewind";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { auth } from "../../constants/firebase";
+import { useGoals } from "../../context/GoalContext";
+import { useTransactions } from "../../context/TransactionContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const Profile = () => {
     const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -14,22 +19,52 @@ const Profile = () => {
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { clearTransactions } = useTransactions();
     const { clearGoals } = useGoals();
-
+    const router = useRouter();    
     const pickImage = async () => {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) return;
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1], // square crop
-            quality: 0.8,
-        });
+    const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+    });
 
-        if (!result.canceled) {
-            setProfileImage(result.assets[0].uri);
-        }
+    if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        setProfileImage(uri);
+        await AsyncStorage.setItem("sika_profile_image", uri);
+    }
+};
+
+useEffect(() => {
+    const loadImage = async () => {
+        const saved = await AsyncStorage.getItem("sika_profile_image");
+        if (saved) setProfileImage(saved);
     };
+    loadImage();
+}, []);
+
+
+const handleLogout = async () => {
+    await signOut(auth);
+    router.replace("/(auth)/login");
+    };
+    
+    const [userName, setUserName] = useState("");
+const [userEmail, setUserEmail] = useState("");
+
+useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            setUserName(user.displayName || "");
+            setUserEmail(user.email || "");
+        }
+    });
+    return unsubscribe;
+}, []);
+    
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950">
@@ -60,8 +95,8 @@ const Profile = () => {
                         </View>
                     </TouchableOpacity>
 
-                    <Text className="text-xl font-bold text-gray-900 dark:text-white mt-4">Kofi Mensah</Text>
-                    <Text className="text-sm text-gray-400 dark:text-gray-500 mt-1">kofi@gmail.com</Text>
+                    <Text className="text-xl font-bold text-gray-900 dark:text-white mt-4">{userName}</Text>
+                    <Text className="text-sm text-gray-400 dark:text-gray-500 mt-1">{userEmail}</Text>
                 </View>
 
                 {/* Financial Details */}
@@ -178,9 +213,20 @@ const Profile = () => {
                                 thumbColor={colorScheme === "dark" ? "#2e7d32" : "#fff"}
                             />
                         </View>
+                                                {/* About */}
+                        <View className="flex-row items-center py-4 border-t border-gray-100 dark:border-zinc-800 gap-3">
+                            <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
+                                <Info size={18} color="#2d6a2d" />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">About</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Sika v{Constants.expoConfig?.version || "1.0.0"}</Text>
+                            </View>
+                            <ChevronRight size={18} color="#ccc" />
+                        </View>
 
                         {/* Clear Data */}
-                            <TouchableOpacity 
+                        <TouchableOpacity 
                                 onPress={() => {
                                     Alert.alert(
                                         "Clear Data",
@@ -208,19 +254,22 @@ const Profile = () => {
                                     <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Reset all transactions</Text>
                                 </View>
                                 <ChevronRight size={18} color="#ccc" />
-                            </TouchableOpacity>
+                        </TouchableOpacity>
+                        
+                        {/* Logout */}
+                        <TouchableOpacity
+                    onPress={handleLogout}
+                    className="flex-row items-center py-4 border-t border-gray-100 gap-3"
+                >
+                    <View className="w-9 h-9 rounded-xl bg-red-50 items-center justify-center">
+                        <LogOut size={18} color="#c62828" />
+                    </View>
+                    <View className="flex-1">
+                        <Text className="text-sm font-semibold text-red-600">Log Out</Text>
+                    </View>
+                        </TouchableOpacity>
 
-                        {/* About */}
-                        <View className="flex-row items-center py-4 border-t border-gray-100 dark:border-zinc-800 gap-3">
-                            <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">
-                                <Info size={18} color="#2d6a2d" />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">About</Text>
-                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Sika v{Constants.expoConfig?.version || "1.0.0"}</Text>
-                            </View>
-                            <ChevronRight size={18} color="#ccc" />
-                        </View>
+
                     </View>
                 </View>
             </ScrollView>

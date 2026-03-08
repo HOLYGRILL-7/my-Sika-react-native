@@ -1,12 +1,32 @@
-import {ArrowDownLeft, ArrowUpRight, Phone, ShoppingCart, Zap} from "lucide-react-native";
-import React, { useState, useCallback } from "react";
-import {FlatList, Image, Text, TouchableOpacity, View, RefreshControl} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { onAuthStateChanged } from "firebase/auth";
+import { ArrowDownLeft, ArrowUpRight, Phone, ShoppingCart, Zap } from "lucide-react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTransactions } from "../../context/TransactionContext";
+import { auth } from "../../constants/firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = () => {
     const [refreshing, setRefreshing] = useState(false);
     const { transactions } = useTransactions();
+    const [userName, setUserName] = useState("there");
+    const [profileImage, setProfileImage] = useState<string | null>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) setUserName(user.displayName?.split(" ")[0] || "there");
+        });
+        return unsubscribe;
+    }, []);
+
+    useEffect(() => {
+        const loadImage = async () => {
+            const saved = await AsyncStorage.getItem("sika_profile_image");
+            if (saved) setProfileImage(saved);
+        };
+        loadImage();
+    }, []);
 
     const totalSpent = transactions
         .filter((t) => t.type === "debit")
@@ -30,6 +50,13 @@ const Home = () => {
             setRefreshing(false);
         }, 1500);
     }, []);
+    const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return "Good morning";
+    if (hour >= 12 && hour < 17) return "Good afternoon";
+    if (hour >= 17 && hour < 21) return "Good evening";
+    return "Good night";
+};
 
     return (
         <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
@@ -44,12 +71,12 @@ const Home = () => {
                     <>
                         {/* Greeting */}
                         <View className="mt-5">
-                            <Text className="text-2xl font-bold dark:text-white">Good morning, Kofi!</Text>
+                            <Text className="text-2xl font-bold dark:text-white">{getGreeting()}, {userName}!</Text>
                             <Text className="text-gray-500 dark:text-gray-400">{"Let's track your money."}</Text>
-                            <Image
-                                source={require("../../assets/images/Me.png")}
-                                className="w-14 h-14 rounded-full absolute right-0 top-0"
-                            />
+                            {profileImage 
+                                ? <Image source={{uri: profileImage}} className="w-14 h-14 rounded-full absolute right-0 top-0" />
+                                : <Image source={require("../../assets/images/Me.png")} className="w-14 h-14 rounded-full absolute right-0 top-0" />
+                            }
                         </View>
 
                         {/* Balance card */}
