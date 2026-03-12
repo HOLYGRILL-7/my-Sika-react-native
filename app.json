@@ -48,7 +48,8 @@
             "compileSdkVersion": 35
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
