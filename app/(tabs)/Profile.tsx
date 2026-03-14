@@ -12,6 +12,7 @@ import { auth } from "../../constants/firebase";
 import { useGoals } from "../../context/GoalContext";
 import { useTransactions } from "../../context/TransactionContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 
 const Profile = () => {
@@ -51,6 +52,11 @@ useFocusEffect(
 
 
 const handleLogout = async () => {
+    try {
+        await GoogleSignin.signOut();
+    } catch (error) {
+        console.log("Not signed in with Google or error during Google sign out");
+    }
     await signOut(auth);
     router.replace("/(auth)/login");
     };

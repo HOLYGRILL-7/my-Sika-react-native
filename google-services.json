@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "727369302653-848dg2qbq9qratjbauik6qaj49htdtfc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anonymous.mySika",
+            "certificate_hash": "2f6ddb338681b4894ca4efe26db05c6eb36150c6"
+          }
+        },
+        {
           "client_id": "727369302653-ubl79nu14aud8i0vrsapaoftlmgt82ts.apps.googleusercontent.com",
           "client_type": 3
         }

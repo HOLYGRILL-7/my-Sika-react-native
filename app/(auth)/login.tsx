@@ -7,14 +7,14 @@ import { Eye, EyeOff, Fingerprint, Lock, Mail, Wallet } from "lucide-react-nativ
 import React, { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth, db } from "../../constants/firebase";
+import { auth, db, GOOGLE_WEB_CLIENT_ID } from "../../constants/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
 
 GoogleSignin.configure({
-    webClientId: "727369302653-ubl79nu14aud8i0vrsapaoftlmgt82ts.apps.googleusercontent.com",
+    webClientId: GOOGLE_WEB_CLIENT_ID,
 });
 
 const Login = () => {

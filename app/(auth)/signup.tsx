@@ -5,11 +5,11 @@ import {Eye, EyeOff, LockKeyhole, Mail, User, UserPlus} from "lucide-react-nativ
 import React, {useState} from "react";
 import {Alert, ScrollView, Text, TextInput, TouchableOpacity, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {auth, db} from "../../constants/firebase";
+import {auth, db, GOOGLE_WEB_CLIENT_ID} from "../../constants/firebase";
 import {GoogleSignin, statusCodes} from "@react-native-google-signin/google-signin";
 
 GoogleSignin.configure({
-    webClientId: "727369302653-ubl79nu14aud8i0vrsapaoftlmgt82ts.apps.googleusercontent.com",
+    webClientId: GOOGLE_WEB_CLIENT_ID,
 });
 
 const Signup = () => {

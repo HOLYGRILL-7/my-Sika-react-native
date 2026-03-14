@@ -19,3 +19,6 @@ export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
 export const db = getFirestore(app);
+
+// Centralized Google Web Client ID (from google-services.json)
+export const GOOGLE_WEB_CLIENT_ID = "727369302653-ubl79nu14aud8i0vrsapaoftlmgt82ts.apps.googleusercontent.com";
