@@ -1,10 +1,11 @@
 import Constants from "expo-constants";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { Bell, Building2, Camera, ChevronRight, DollarSign, Download, Info, LogOut, Moon, Smartphone, Trash2, User } from "lucide-react-native";
+import * as LocalAuthentication from "expo-local-authentication";
+import { Bell, Building2, Camera, ChevronRight, Download, Fingerprint, Info, LogOut, Moon, Smartphone, Trash2, User } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Alert, Image, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../constants/firebase";
@@ -38,13 +39,15 @@ const Profile = () => {
     }
 };
 
-useEffect(() => {
-    const loadImage = async () => {
-        const saved = await AsyncStorage.getItem("sika_profile_image");
-        if (saved) setProfileImage(saved);
-    };
-    loadImage();
-}, []);
+useFocusEffect(
+    useCallback(() => {
+        const loadImage = async () => {
+            const saved = await AsyncStorage.getItem("sika_profile_image");
+            setProfileImage(saved);
+        };
+        loadImage();
+    }, [])
+);
 
 
 const handleLogout = async () => {
@@ -54,6 +57,57 @@ const handleLogout = async () => {
     
     const [userName, setUserName] = useState("");
 const [userEmail, setUserEmail] = useState("");
+
+const handleSMSPermission = async (value: boolean) => {
+    if (value) {
+        // Request SMS permissions (Using simplified Alert for demonstration as standard RN alert
+        // or a custom library like react-native-get-sms-android would be needed for actual sync)
+        Alert.alert(
+            "SMS Permission",
+            "Sika needs access to your SMS to automatically track transaction alerts. Would you like to enable this?",
+            [
+                { text: "No", onPress: () => setSmsEnabled(false), style: "cancel" },
+                { text: "Yes", onPress: () => setSmsEnabled(true) }
+            ]
+        );
+    } else {
+        setSmsEnabled(false);
+    }
+};
+
+const handleSetFingerprint = async () => {
+    try {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        if (!hasHardware) {
+            Alert.alert("Hardware Error", "Your device doesn't support biometric authentication.");
+            return;
+        }
+
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (!isEnrolled) {
+            Alert.alert(
+                "Not Enrolled", 
+                "No biometrics found. Please go to your device settings to register your fingerprint or face."
+            );
+            return;
+        }
+
+        const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: "Confirm identity to enable biometrics",
+            fallbackLabel: "Use password",
+        });
+
+        if (result.success) {
+            if (userEmail) {
+                await AsyncStorage.setItem("sika_user_email", userEmail);
+                await AsyncStorage.setItem("sika_biometrics_enabled", "true");
+            }
+            Alert.alert("Success", "Biometric authentication is ready to use for your next login.");
+        }
+    } catch (error: any) {
+        Alert.alert("Error", error.message);
+    }
+};
 
 useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -158,7 +212,7 @@ useEffect(() => {
                             </View>
                             <Switch
                                 value={smsEnabled}
-                                onValueChange={setSmsEnabled}
+                                onValueChange={handleSMSPermission}
                                 trackColor={{false: "#e0e0e0", true: "#a5d6a7"}}
                                 thumbColor={smsEnabled ? "#2e7d32" : "#fff"}
                             />
@@ -177,16 +231,19 @@ useEffect(() => {
                         </View>
 
                         {/* Currency Display */}
-                        <View className="flex-row items-center py-4 border-b border-gray-100 gap-3">
+                        <TouchableOpacity 
+                            onPress={handleSetFingerprint}
+                            className="flex-row items-center py-4 border-b border-gray-100 gap-3"
+                        >
                             <View className="w-9 h-9 rounded-xl bg-green-50 items-center justify-center">
-                                <DollarSign size={18} color="#2d6a2d" />
+                                <Fingerprint size={18} color="#2d6a2d" />
                             </View>
                             <View className="flex-1">
-                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Currency Display</Text>
-                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Ghana Cedis (₵)</Text>
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white">Set Fingerprint</Text>
+                                <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Use biometrics for login</Text>
                             </View>
                             <ChevronRight size={18} color="#ccc" />
-                        </View>
+                        </TouchableOpacity>
 
                             <View className="flex-row items-center py-4 border-b border-gray-100 dark:border-zinc-800 gap-3">
                                 <View className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 items-center justify-center">

@@ -1,11 +1,16 @@
 import {useRouter} from "expo-router";
+import {createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithCredential} from "firebase/auth";
+import {doc, setDoc} from "firebase/firestore";
 import {Eye, EyeOff, LockKeyhole, Mail, User, UserPlus} from "lucide-react-native";
 import React, {useState} from "react";
 import {Alert, ScrollView, Text, TextInput, TouchableOpacity, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {createUserWithEmailAndPassword, updateProfile} from "firebase/auth";
-import {doc, setDoc} from "firebase/firestore";
 import {auth, db} from "../../constants/firebase";
+import {GoogleSignin, statusCodes} from "@react-native-google-signin/google-signin";
+
+GoogleSignin.configure({
+    webClientId: "727369302653-ubl79nu14aud8i0vrsapaoftlmgt82ts.apps.googleusercontent.com",
+});
 
 const Signup = () => {
     const router = useRouter();
@@ -15,6 +20,7 @@ const Signup = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -31,21 +37,17 @@ const Signup = () => {
             Alert.alert("Error", "Password must be at least 6 characters");
             return;
         }
-
         setLoading(true);
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
             await updateProfile(userCredential.user, {displayName: name});
-
             await setDoc(doc(db, "users", userCredential.user.uid), {
                 name,
                 phone: `+233${phone}`,
                 email,
                 createdAt: new Date().toISOString(),
             });
-
-            router.push("/(tabs)/home");
+            router.replace("/(tabs)/home");
         } catch (error: any) {
             if (error.code === "auth/email-already-in-use") {
                 Alert.alert("Error", "Email already in use");
@@ -56,6 +58,38 @@ const Signup = () => {
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoogleSignUp = async () => {
+        setGoogleLoading(true);
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            const idToken = userInfo.data?.idToken;
+            if (!idToken) return;
+            const credential = GoogleAuthProvider.credential(idToken);
+            const userCredential = await signInWithCredential(auth, credential);
+            const user = userCredential.user;
+            await setDoc(doc(db, "users", user.uid), {
+                name: user.displayName || "",
+                email: user.email || "",
+                phone: "",
+                createdAt: new Date().toISOString(),
+            }, {merge: true});
+            router.replace("/(tabs)/home");
+        } catch (error: any) {
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+                // user cancelled
+            } else if (error.code === statusCodes.IN_PROGRESS) {
+                Alert.alert("Info", "Sign in already in progress");
+            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+                Alert.alert("Error", "Google Play Services not available");
+            } else {
+                Alert.alert("Error", error.message);
+            }
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
@@ -149,10 +183,7 @@ const Signup = () => {
                                     onChangeText={setPassword}
                                 />
                                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                    {showPassword
-                                        ? <Eye color="#777" size={20} />
-                                        : <EyeOff color="#777" size={20} />
-                                    }
+                                    {showPassword ? <Eye color="#777" size={20} /> : <EyeOff color="#777" size={20} />}
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -171,10 +202,7 @@ const Signup = () => {
                                     onChangeText={setConfirmPassword}
                                 />
                                 <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                                    {showConfirmPassword
-                                        ? <Eye color="#777" size={20} />
-                                        : <EyeOff color="#777" size={20} />
-                                    }
+                                    {showConfirmPassword ? <Eye color="#777" size={20} /> : <EyeOff color="#777" size={20} />}
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -198,9 +226,15 @@ const Signup = () => {
                         </View>
 
                         {/* Google Sign Up */}
-                        <TouchableOpacity className="flex-row items-center justify-center gap-3 border border-gray-200 dark:border-zinc-700 py-4 rounded-xl">
-                            <Text className="text-2xl">G</Text>
-                            <Text className="font-semibold text-gray-700 dark:text-gray-300 text-base">Sign up with Google</Text>
+                        <TouchableOpacity
+                            className="flex-row items-center justify-center gap-3 border border-gray-200 dark:border-zinc-700 py-4 rounded-xl"
+                            onPress={handleGoogleSignUp}
+                            disabled={googleLoading}
+                        >
+                            <Text className="text-2xl font-bold text-blue-500">G</Text>
+                            <Text className="font-semibold text-gray-700 dark:text-gray-300 text-base">
+                                {googleLoading ? "Signing up..." : "Sign up with Google"}
+                            </Text>
                         </TouchableOpacity>
 
                     </View>

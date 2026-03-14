@@ -92,7 +92,7 @@ const Welcome = () => {
                 <TouchableOpacity
                     style={styles.button}
                     activeOpacity={0.85}
-                    onPress={() => router.replace("/(auth)/signup")}
+                    onPress={() => router.push("/(auth)/signup")}
                 >
                     <View style={{flexDirection: "row", alignItems: "center", gap: 8}}>
                         <Text style={styles.buttonText}>Get Started</Text>
