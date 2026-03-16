@@ -1,16 +1,12 @@
-import {useRouter} from "expo-router";
-import {createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithCredential} from "firebase/auth";
-import {doc, setDoc} from "firebase/firestore";
-import {Eye, EyeOff, LockKeyhole, Mail, User, UserPlus} from "lucide-react-native";
-import React, {useState} from "react";
-import {Alert, ScrollView, Text, TextInput, TouchableOpacity, View} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {auth, db, GOOGLE_WEB_CLIENT_ID} from "../../constants/firebase";
-import {GoogleSignin, statusCodes} from "@react-native-google-signin/google-signin";
-
-GoogleSignin.configure({
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-});
+import { useRouter } from "expo-router";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { Eye, EyeOff, LockKeyhole, Mail, User, UserPlus } from "lucide-react-native";
+import React, { useState } from "react";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { auth, db } from "../../constants/firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Signup = () => {
     const router = useRouter();
@@ -20,7 +16,6 @@ const Signup = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [googleLoading, setGoogleLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -39,14 +34,16 @@ const Signup = () => {
         }
         setLoading(true);
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(userCredential.user, {displayName: name});
+            const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+            await updateProfile(userCredential.user, { displayName: name });
             await setDoc(doc(db, "users", userCredential.user.uid), {
                 name,
                 phone: `+233${phone}`,
-                email,
+                email: email.trim(),
                 createdAt: new Date().toISOString(),
             });
+            await AsyncStorage.setItem("sika_user_email", email.trim());
+            await AsyncStorage.setItem("sika_user_password", password);
             router.replace("/(tabs)/home");
         } catch (error: any) {
             if (error.code === "auth/email-already-in-use") {
@@ -61,45 +58,13 @@ const Signup = () => {
         }
     };
 
-    const handleGoogleSignUp = async () => {
-        setGoogleLoading(true);
-        try {
-            await GoogleSignin.hasPlayServices();
-            const userInfo = await GoogleSignin.signIn();
-            const idToken = userInfo.data?.idToken;
-            if (!idToken) return;
-            const credential = GoogleAuthProvider.credential(idToken);
-            const userCredential = await signInWithCredential(auth, credential);
-            const user = userCredential.user;
-            await setDoc(doc(db, "users", user.uid), {
-                name: user.displayName || "",
-                email: user.email || "",
-                phone: "",
-                createdAt: new Date().toISOString(),
-            }, {merge: true});
-            router.replace("/(tabs)/home");
-        } catch (error: any) {
-            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                // user cancelled
-            } else if (error.code === statusCodes.IN_PROGRESS) {
-                Alert.alert("Info", "Sign in already in progress");
-            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                Alert.alert("Error", "Google Play Services not available");
-            } else {
-                Alert.alert("Error", error.message);
-            }
-        } finally {
-            setGoogleLoading(false);
-        }
-    };
-
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950 relative">
             <View
                 className="absolute top-0 right-0 w-[35em] h-[25em] bg-yellow-200 dark:bg-yellow-900/10 rounded-full opacity-40"
-                style={{transform: [{translateX: 40}, {translateY: -40}]}}
+                style={{ transform: [{ translateX: 40 }, { translateY: -40 }] }}
             />
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 40}}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
                 <View className="mt-20">
                     <View className="mx-auto">
                         <View className="bg-green-900 self-start p-5 rounded-3xl relative">
@@ -215,25 +180,6 @@ const Signup = () => {
                         >
                             <Text className="text-white text-center font-bold text-base">
                                 {loading ? "Creating account..." : "Sign Up"}
-                            </Text>
-                        </TouchableOpacity>
-
-                        {/* Divider */}
-                        <View className="flex-row items-center gap-3 my-5">
-                            <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
-                            <Text className="text-gray-400 text-sm">or continue with</Text>
-                            <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
-                        </View>
-
-                        {/* Google Sign Up */}
-                        <TouchableOpacity
-                            className="flex-row items-center justify-center gap-3 border border-gray-200 dark:border-zinc-700 py-4 rounded-xl"
-                            onPress={handleGoogleSignUp}
-                            disabled={googleLoading}
-                        >
-                            <Text className="text-2xl font-bold text-blue-500">G</Text>
-                            <Text className="font-semibold text-gray-700 dark:text-gray-300 text-base">
-                                {googleLoading ? "Signing up..." : "Sign up with Google"}
                             </Text>
                         </TouchableOpacity>
 

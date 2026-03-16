@@ -1,21 +1,12 @@
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
-import { GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { Eye, EyeOff, Fingerprint, Lock, Mail, Wallet } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth, db, GOOGLE_WEB_CLIENT_ID } from "../../constants/firebase";
+import { auth } from "../../constants/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
-
-
-GoogleSignin.configure({
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-});
 
 const Login = () => {
     const router = useRouter();
@@ -23,18 +14,39 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [googleLoading, setGoogleLoading] = useState(false);
+    const [authChecked, setAuthChecked] = useState(false);
+    const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                router.replace("/(tabs)/home");
+            } else {
+                setAuthChecked(true);
+            }
+        });
+        return unsubscribe;
+    }, []);
+
+    useEffect(() => {
+        const checkSavedCredentials = async () => {
+            const savedEmail = await AsyncStorage.getItem("sika_user_email");
+            const savedPassword = await AsyncStorage.getItem("sika_user_password");
+            setHasSavedCredentials(!!(savedEmail && savedPassword));
+        };
+        checkSavedCredentials();
+    }, []);
 
     const handleLogin = async () => {
-        if (!email || !password) {
+        const trimmedEmail = email.trim();
+        if (!trimmedEmail || !password) {
             Alert.alert("Error", "Please fill in all fields");
             return;
         }
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            // Save credentials for biometrics
-            await AsyncStorage.setItem("sika_user_email", email);
+            await signInWithEmailAndPassword(auth, trimmedEmail, password);
+            await AsyncStorage.setItem("sika_user_email", trimmedEmail);
             await AsyncStorage.setItem("sika_user_password", password);
             router.replace("/(tabs)/home");
         } catch (error: any) {
@@ -44,6 +56,8 @@ const Login = () => {
                 Alert.alert("Error", "No account found with this email");
             } else if (error.code === "auth/invalid-email") {
                 Alert.alert("Error", "Invalid email address");
+            } else if (error.code === "auth/too-many-requests") {
+                Alert.alert("Error", "Too many failed attempts. Please try again later.");
             } else {
                 Alert.alert("Error", error.message);
             }
@@ -52,84 +66,46 @@ const Login = () => {
         }
     };
 
-    const handleGoogleSignIn = async () => {
-        setGoogleLoading(true);
+    const handleBiometricLogin = async () => {
         try {
-            await GoogleSignin.hasPlayServices();
-            const userInfo = await GoogleSignin.signIn();
-            const idToken = userInfo.data?.idToken;
-            if (!idToken) return;
-            const credential = GoogleAuthProvider.credential(idToken);
-            const userCredential = await signInWithCredential(auth, credential);
-            
-            // Create profile if it doesn't exist
-            const user = userCredential.user;
-            await setDoc(doc(db, "users", user.uid), {
-                name: user.displayName || "",
-                email: user.email || "",
-                phone: "",
-                createdAt: new Date().toISOString(),
-            }, { merge: true });
-
-            router.replace("/(tabs)/home");
-        } catch (error: any) {
-            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                // user cancelled, do nothing
-            } else if (error.code === statusCodes.IN_PROGRESS) {
-                Alert.alert("Info", "Sign in already in progress");
-            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                Alert.alert("Error", "Google Play Services not available");
-            } else {
-                Alert.alert("Error", error.message);
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            if (!hasHardware) {
+                Alert.alert("Error", "Your device doesn't support biometrics");
+                return;
             }
-        } finally {
-            setGoogleLoading(false);
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+            if (!isEnrolled) {
+                Alert.alert("Error", "No biometrics enrolled. Please set up fingerprint in your phone settings.");
+                return;
+            }
+            const result = await LocalAuthentication.authenticateAsync({
+                promptMessage: "Login to Sika",
+                fallbackLabel: "Use password instead",
+                cancelLabel: "Cancel",
+            });
+            if (result.success) {
+                const savedEmail = await AsyncStorage.getItem("sika_user_email");
+                const savedPassword = await AsyncStorage.getItem("sika_user_password");
+                if (savedEmail && savedPassword) {
+                    setLoading(true);
+                    try {
+                        await signInWithEmailAndPassword(auth, savedEmail, savedPassword);
+                        router.replace("/(tabs)/home");
+                    } catch (err: any) {
+                        Alert.alert("Error", "Could not sign in. Please enter your password manually.");
+                    } finally {
+                        setLoading(false);
+                    }
+                } else {
+                    Alert.alert("Error", "No saved session. Please login with email and password first.");
+                }
+            }
+        } catch (error: any) {
+            Alert.alert("Error", error.message);
         }
     };
 
-    const handleBiometricLogin = async () => {
-    try {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        if (!hasHardware) {
-            Alert.alert("Error", "Your device doesn't support biometrics");
-            return;
-        }
-
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        if (!isEnrolled) {
-            Alert.alert("Error", "No biometrics enrolled on this device. Please set up fingerprint or face ID in your phone settings.");
-            return;
-        }
-
-        const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: "Login to Sika",
-            fallbackLabel: "Use password instead",
-            cancelLabel: "Cancel",
-        });
-
-        if (result.success) {
-            // Biometric passed — get saved credentials and sign in
-            const savedEmail = await AsyncStorage.getItem("sika_user_email");
-            const savedPassword = await AsyncStorage.getItem("sika_user_password");
-
-            if (savedEmail && savedPassword) {
-                setLoading(true);
-                try {
-                    await signInWithEmailAndPassword(auth, savedEmail, savedPassword);
-                    router.replace("/(tabs)/home");
-                } catch (err: any) {
-                    Alert.alert("Authentication Failed", "Could not sign in with saved credentials. Please enter your password manually.");
-                } finally {
-                    setLoading(false);
-                }
-            } else {
-                Alert.alert("Error", "No saved session found. Please login with email and password first to enable biometric login.");
-            }
-        }
-    } catch (error: any) {
-        Alert.alert("Error", error.message);
-    }
-};
+    if (!authChecked) return null;
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950">
@@ -208,34 +184,23 @@ const Login = () => {
                             </Text>
                         </TouchableOpacity>
 
-                        {/* Divider */}
-                        <View className="flex-row items-center gap-3 my-4">
-                            <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
-                            <Text className="text-gray-400 text-sm">or</Text>
-                            <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
-                        </View>
-
-                        {/* Google Sign In */}
-                        <TouchableOpacity
-                            className="flex-row items-center justify-center gap-3 border border-gray-100 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 py-4 rounded-2xl mb-3"
-                            onPress={handleGoogleSignIn}
-                            disabled={googleLoading}
-                        >
-                            <Text className="text-xl font-bold text-blue-500">G</Text>
-                            <Text className="text-gray-700 dark:text-white font-bold">
-                                {googleLoading ? "Signing in..." : "Continue with Google"}
-                            </Text>
-                        </TouchableOpacity>
-
-                        {/* Biometrics */}
-                        <TouchableOpacity
-                            className="flex-row items-center justify-center py-4 rounded-2xl border border-gray-100 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800"
-                            onPress={handleBiometricLogin}
-                        >
-                            <Fingerprint color="#22c55e" size={20} />
-                            <Text className="text-green-900 dark:text-white font-bold ml-2">Login with Biometrics</Text>
-                        </TouchableOpacity>
-
+                        {/* Biometrics — only show if user has logged in before */}
+                        {hasSavedCredentials && (
+                            <>
+                                <View className="flex-row items-center gap-3 my-4">
+                                    <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
+                                    <Text className="text-gray-400 text-sm">or</Text>
+                                    <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
+                                </View>
+                                <TouchableOpacity
+                                    className="flex-row items-center justify-center py-4 rounded-2xl border border-gray-100 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800"
+                                    onPress={handleBiometricLogin}
+                                >
+                                    <Fingerprint color="#22c55e" size={20} />
+                                    <Text className="text-green-900 dark:text-white font-bold ml-2">Login with Biometrics</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
                     </View>
 
                     {/* Bottom Link */}
