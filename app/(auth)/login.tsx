@@ -3,7 +3,8 @@ import { useRouter } from "expo-router";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { Eye, EyeOff, Fingerprint, Lock, Mail, Wallet } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../constants/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -109,11 +110,14 @@ const Login = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950">
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            <KeyboardAwareScrollView
                 className="flex-1"
+                contentContainerStyle={{flexGrow: 1}}
+                showsVerticalScrollIndicator={false}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === "ios" ? 20 : 40}
+                keyboardShouldPersistTaps="handled"
             >
-                <ScrollView contentContainerStyle={{flexGrow: 1}} showsVerticalScrollIndicator={false}>
 
                     {/* Header/Logo Section */}
                     <View className="items-center mt-10 mb-12">
@@ -211,8 +215,7 @@ const Login = () => {
                         </TouchableOpacity>
                     </View>
 
-                </ScrollView>
-            </KeyboardAvoidingView>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 };

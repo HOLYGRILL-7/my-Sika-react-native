@@ -1,7 +1,8 @@
 import {useRouter} from "expo-router";
 import {Mail, Wallet} from "lucide-react-native";
 import React, {useState} from "react";
-import {Alert, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {Alert, Platform, Text, TextInput, TouchableOpacity, View} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {sendPasswordResetEmail} from "firebase/auth";
 import {auth} from "../../constants/firebase";
@@ -30,7 +31,15 @@ const ForgotPassword = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-950">
-            <View className="flex-1 px-6 pt-10">
+            <KeyboardAwareScrollView
+                className="flex-1"
+                contentContainerStyle={{flexGrow: 1}}
+                showsVerticalScrollIndicator={false}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === "ios" ? 20 : 40}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View className="flex-1 px-6 pt-10">
                 <TouchableOpacity onPress={() => router.back()} className="mb-8">
                     <Text className="text-green-700 dark:text-green-400 font-semibold">← Back</Text>
                 </TouchableOpacity>
@@ -82,7 +91,8 @@ const ForgotPassword = () => {
                         </TouchableOpacity>
                     </View>
                 )}
-            </View>
+                </View>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 };
