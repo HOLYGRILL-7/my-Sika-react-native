@@ -1,18 +1,17 @@
 import React, {useState} from "react";
 import {Text, TextInput, TouchableOpacity, View, ScrollView} from "react-native";
-import {Search, RefreshCw, ArrowDownLeft, ArrowUpRight, X, Plus} from "lucide-react-native";
+import {Search, RefreshCw, ArrowDownLeft, ArrowUpRight, X, Plus, Sparkles} from "lucide-react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import AddTransactionModal from "../../components/AddTransactionModal";
-
+import SikaAIModal from "../../components/Sikaaimodal";
+import FloatingActionMenu from "../../components/FloatingActionMenu";
 import { Transaction } from "../../constants/mockData";
 import { useTransactions } from "../../context/TransactionContext";
 
 const groupByDate = (transactions: Transaction[]) => {
     return transactions.reduce((groups: Record<string, Transaction[]>, transaction) => {
         const date = transaction.date;
-        if (!groups[date]) {
-            groups[date] = [];
-        }
+        if (!groups[date]) groups[date] = [];
         groups[date].push(transaction);
         return groups;
     }, {});
@@ -24,8 +23,7 @@ const Transactions = () => {
     const [search, setSearch] = useState("");
     const [activeFilter, setActiveFilter] = useState("All");
     const [showModal, setShowModal] = useState(false);
-    
-    // Use global state instead of local mock state
+    const [aiVisible, setAiVisible] = useState(false);
     const { transactions, addTransaction } = useTransactions();
 
     const filtered = transactions.filter((t) => {
@@ -50,9 +48,7 @@ const Transactions = () => {
                 </View>
 
                 {/* Search */}
-                <View
-                    className="flex-row mx-6 mt-4 px-4 py-3 rounded-2xl items-center gap-3 bg-[#e8f0e8] dark:bg-zinc-900"
-                >
+                <View className="flex-row mx-6 mt-4 px-4 py-3 rounded-2xl items-center gap-3 bg-[#e8f0e8] dark:bg-zinc-900">
                     <Search size={20} color="#666" />
                     <TextInput
                         className="flex-1 text-base text-gray-800 dark:text-white"
@@ -85,11 +81,7 @@ const Transactions = () => {
                                     : "bg-orange-300/20 dark:bg-zinc-900 border-gray-200 dark:border-zinc-800"
                             }`}
                         >
-                            <Text
-                                className={`text-sm font-medium ${
-                                    activeFilter === f ? "text-white" : "text-green-900 dark:text-green-400"
-                                }`}
-                            >
+                            <Text className={`text-sm font-medium ${activeFilter === f ? "text-white" : "text-green-900 dark:text-green-400"}`}>
                                 {f}
                             </Text>
                         </TouchableOpacity>
@@ -106,18 +98,13 @@ const Transactions = () => {
                 </TouchableOpacity>
 
                 {/* Transactions List */}
-                <View className="px-6 mt-6">
+                <View className="px-6 mt-6 pb-32">
                     {Object.entries(grouped).map(([date, transactions]) => (
                         <View key={date} className="mb-6">
-                            {/* Date header */}
                             <View className="flex-row items-center gap-3 mb-3">
-                                <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                                    {date}
-                                </Text>
+                                <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{date}</Text>
                                 <View className="flex-1 h-px bg-gray-200" />
                             </View>
-
-                            {/* Transaction rows */}
                             <View
                                 className="bg-white dark:bg-zinc-900 rounded-2xl px-4"
                                 style={{shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 8, elevation: 2}}
@@ -129,33 +116,20 @@ const Transactions = () => {
                                             index !== transactions.length - 1 ? "border-b border-gray-100 dark:border-zinc-800" : ""
                                         }`}
                                     >
-                                        {/* Icon */}
                                         <View
                                             className="w-11 h-11 rounded-xl items-center justify-center p-2"
                                             style={{backgroundColor: t.type === "credit" ? "rgba(232, 245, 233, 1)" : "rgba(254, 242, 242, 1)"}}
                                         >
-                                            {/* Using hardcoded light colors for icons bg is fine for contrast, but let's make it theme-aware */}
-                                            <View className="absolute inset-0 rounded-xl bg-opacity-0 dark:bg-zinc-800/50" />
-                                            {t.type === "credit" ? (
-                                                <ArrowDownLeft size={20} color="#2e7d32" />
-                                            ) : (
-                                                <ArrowUpRight size={20} color="#c62828" />
-                                            )}
+                                            {t.type === "credit"
+                                                ? <ArrowDownLeft size={20} color="#2e7d32" />
+                                                : <ArrowUpRight size={20} color="#c62828" />
+                                            }
                                         </View>
-
-                                        {/* Name & category */}
                                         <View className="flex-1">
                                             <Text className="text-sm font-semibold text-green-900 dark:text-white">{t.name}</Text>
-                                            <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                                {t.category} · {t.time}
-                                            </Text>
+                                            <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t.category} · {t.time}</Text>
                                         </View>
-
-                                        {/* Amount */}
-                                        <Text
-                                            className="text-sm font-bold"
-                                            style={{color: t.type === "credit" ? "#2e7d32" : "#c62828"}}
-                                        >
+                                        <Text className="text-sm font-bold" style={{color: t.type === "credit" ? "#2e7d32" : "#c62828"}}>
                                             {t.type === "credit" ? "+" : "-"}₵{t.amount}.00
                                         </Text>
                                     </View>
@@ -164,7 +138,6 @@ const Transactions = () => {
                         </View>
                     ))}
 
-                    {/* Empty state */}
                     {filtered.length === 0 && (
                         <View className="items-center py-20">
                             <Search size={40} color="#ddd" />
@@ -174,22 +147,35 @@ const Transactions = () => {
                     )}
                 </View>
             </ScrollView>
-            {/* Floating Add Button */}
-            <TouchableOpacity
-                onPress={() => setShowModal(true)}
-                className="absolute bottom-6 right-6 w-14 h-14 rounded-full items-center justify-center"
-                style={{backgroundColor: "#2e7d32", elevation: 5}}
-            >
-                <Plus size={28} color="white" />
-            </TouchableOpacity>
+
+            <FloatingActionMenu
+                actions={[
+                    {
+                        icon: <Sparkles size={20} color="#f5c518" />,
+                        label: "Ask Sika AI",
+                        onPress: () => setAiVisible(true),
+                        color: "#064e3b"
+                    },
+                    {
+                        icon: <Plus size={24} color="white" />,
+                        label: "Add Transaction",
+                        onPress: () => setShowModal(true),
+                        color: "#2e7d32"
+                    }
+                ]}
+            />
 
             <AddTransactionModal
                 visible={showModal}
                 onClose={() => setShowModal(false)}
-                onAdd={(t) => {
-                    addTransaction(t);
-                    setShowModal(false);
-                }}
+                onAdd={(t) => { addTransaction(t); setShowModal(false); }}
+            />
+
+            <SikaAIModal
+                visible={aiVisible}
+                onClose={() => setAiVisible(false)}
+                transactions={transactions}
+                context="transactions"
             />
         </SafeAreaView>
     );
