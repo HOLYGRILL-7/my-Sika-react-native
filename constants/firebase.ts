@@ -1,6 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeAuth } from "firebase/auth";
+// @ts-ignore - getReactNativePersistence is standard for React Native but can have typing issues in some setups
+import { getReactNativePersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_ImORcvF4HobUXQ1JXSlrBCB-XGEe9d0",
@@ -12,5 +15,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 export const db = getFirestore(app);
+
+// Centralized Google Web Client ID (from google-services.json)
+export const GOOGLE_WEB_CLIENT_ID = "727369302653-ubl79nu14aud8i0vrsapaoftlmgt82ts.apps.googleusercontent.com";
