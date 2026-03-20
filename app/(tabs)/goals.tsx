@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {Text, View, ScrollView, TouchableOpacity} from "react-native";
 import {Plus, Calendar, GraduationCap, Smartphone, Shield, Sparkles} from "lucide-react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import AddGoalModal from "../../components/AddGoalModal";
+import AddGoalModal from "../../components/AddgoalModal";
 import SikaAIModal from "../../components/Sikaaimodal";
 import FloatingActionMenu from "../../components/FloatingActionMenu";
 import { useGoals } from "../../context/GoalContext";
