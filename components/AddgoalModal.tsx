@@ -2,6 +2,7 @@ import { Car, GraduationCap, Heart, Home, Shield, Smartphone, X } from "lucide-r
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type Props = {
     visible: boolean;
@@ -57,19 +58,27 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                 <TouchableOpacity className="flex-1 bg-black/40" activeOpacity={1} onPress={onClose} />
 
                 {/* Sheet */}
-                <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-5 pb-10">
-                    {/* Handle */}
-                    <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-5" />
+                <View className="bg-white dark:bg-zinc-900 rounded-t-3xl pt-5 pb-10 mt-10 max-h-[90%]">
+                    <View className="px-6">
+                        {/* Handle */}
+                        <View className="w-10 h-1 bg-gray-200 rounded-full self-center mb-5" />
 
-                    {/* Header */}
-                    <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-xl font-bold text-gray-900 dark:text-white">New Goal</Text>
-                        <TouchableOpacity onPress={onClose}>
-                            <X size={22} color="#999" />
-                        </TouchableOpacity>
+                        {/* Header */}
+                        <View className="flex-row justify-between items-center mb-6">
+                            <Text className="text-xl font-bold text-gray-900 dark:text-white">New Goal</Text>
+                            <TouchableOpacity onPress={onClose}>
+                                <X size={22} color="#999" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
-                    <ScrollView showsVerticalScrollIndicator={false}>
+                    <KeyboardAwareScrollView 
+                        showsVerticalScrollIndicator={false}
+                        enableOnAndroid={true}
+                        extraScrollHeight={Platform.OS === "ios" ? 20 : 40}
+                        keyboardShouldPersistTaps="handled"
+                        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 20 }}
+                    >
                         {/* Icon picker */}
                         <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Icon</Text>
                         <View className="flex-row gap-3 mb-5">
@@ -159,7 +168,7 @@ const AddGoalModal = ({visible, onClose, onAdd}: Props) => {
                         >
                             <Text className="text-white font-bold text-base">Add Goal</Text>
                         </TouchableOpacity>
-                    </ScrollView>
+                    </KeyboardAwareScrollView>
                 </View>
             </KeyboardAvoidingView>
         </Modal>
