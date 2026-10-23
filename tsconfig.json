@@ -16,7 +16,6 @@
     "nativewind-env.d.ts"
   ],
   "exclude": [
-    "node_modules",
-    "my-expo-app"
+    "node_modules"
   ]
 }
