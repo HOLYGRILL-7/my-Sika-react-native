@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Sparkles, X, Send } from "lucide-react-native";
 import { Transaction } from "../constants/mockData";
+import { Goal } from "../context/GoalContext";
 
 type Message = {
     role: "user" | "assistant";
@@ -16,7 +17,7 @@ type Props = {
     onClose: () => void;
     transactions: Transaction[];
     context?: "home" | "transactions" | "goals";
-    goals?: any[];
+    goals?: Goal[];
 };
 
 const API_KEY = process.env.EXPO_PUBLIC_CLAUDE_API_KEY || "";
@@ -35,7 +36,7 @@ const SikaAIModal = ({ visible, onClose, transactions, context = "home", goals =
         ).join("\n");
 
         const goalsInfo = goals.length > 0
-            ? goals.map((g: any) => `${g.name}: ₵${g.savedAmount} of ₵${g.targetAmount}`).join("\n")
+            ? goals.map((g) => `${g.name}: ₵${g.saved} of ₵${g.target}`).join("\n")
             : "No goals set yet";
 
         return `You are Sika AI, a friendly and smart personal finance assistant for Ghanaians. 
