@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -43,8 +42,6 @@ const Signup = () => {
                 email: email.trim(),
                 createdAt: new Date().toISOString(),
             });
-            await AsyncStorage.setItem("sika_user_email", email.trim());
-            await AsyncStorage.setItem("sika_user_password", password);
             router.replace("/(tabs)/home");
         } catch (error: any) {
             if (error.code === "auth/email-already-in-use") {

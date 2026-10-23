@@ -16,7 +16,7 @@ A personal finance app for people in Ghana that lets you log your income and spe
 
 - **Accounts.** Email/password sign-up and login with Firebase Authentication. On sign-up, a user profile (name, +233 phone number, email) is saved to Firestore. The session persists across app restarts.
 - **Password reset** by email through Firebase.
-- **Biometric login.** After your first login you can sign in with fingerprint or face (`expo-local-authentication`). You can also set it up from the Profile screen.
+- **Biometric app lock.** Turn it on from the Profile screen. Sika then asks for your fingerprint or face (`expo-local-authentication`) before restoring your saved session on launch. The Firebase session is stored in the device keystore via `expo-secure-store`, and passwords are never stored.
 - **Auth-gated navigation.** Signed-out users are sent to the welcome/auth screens, and signed-in users go straight to the tabs.
 - **Home dashboard.** Shows a time-of-day greeting, total cash flow, total spent and received this month, and your recent transactions.
 - **Transactions.** Add debit or credit transactions manually with a category (Transfer, Food, Transport, Utilities, Airtime, Other). You can search them and filter by category. They are saved on the device with AsyncStorage.

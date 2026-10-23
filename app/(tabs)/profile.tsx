@@ -13,6 +13,8 @@ import { useGoals } from "../../context/GoalContext";
 import { useTransactions } from "../../context/TransactionContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import * as SecureStore from "expo-secure-store";
+import { BIOMETRICS_ENABLED_KEY } from "../../constants/secureStorage";
 
 
 const Profile = () => {
@@ -104,11 +106,8 @@ const handleSetFingerprint = async () => {
         });
 
         if (result.success) {
-            if (userEmail) {
-                await AsyncStorage.setItem("sika_user_email", userEmail);
-                await AsyncStorage.setItem("sika_biometrics_enabled", "true");
-            }
-            Alert.alert("Success", "Biometric authentication is ready to use for your next login.");
+            await SecureStore.setItemAsync(BIOMETRICS_ENABLED_KEY, "true");
+            Alert.alert("Success", "Sika will ask for your fingerprint or face when you open the app.");
         }
     } catch (error: any) {
         Alert.alert("Error", error.message);

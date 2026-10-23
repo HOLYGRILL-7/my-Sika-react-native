@@ -1,13 +1,11 @@
-import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
-import { Eye, EyeOff, Fingerprint, Lock, Mail, Wallet } from "lucide-react-native";
+import { Eye, EyeOff, Lock, Mail, Wallet } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Alert, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../constants/firebase";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = () => {
     const router = useRouter();
@@ -16,7 +14,6 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
-    const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -29,15 +26,6 @@ const Login = () => {
         return unsubscribe;
     }, []);
 
-    useEffect(() => {
-        const checkSavedCredentials = async () => {
-            const savedEmail = await AsyncStorage.getItem("sika_user_email");
-            const savedPassword = await AsyncStorage.getItem("sika_user_password");
-            setHasSavedCredentials(!!(savedEmail && savedPassword));
-        };
-        checkSavedCredentials();
-    }, []);
-
     const handleLogin = async () => {
         const trimmedEmail = email.trim();
         if (!trimmedEmail || !password) {
@@ -47,8 +35,6 @@ const Login = () => {
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, trimmedEmail, password);
-            await AsyncStorage.setItem("sika_user_email", trimmedEmail);
-            await AsyncStorage.setItem("sika_user_password", password);
             router.replace("/(tabs)/home");
         } catch (error: any) {
             if (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password") {
@@ -64,45 +50,6 @@ const Login = () => {
             }
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleBiometricLogin = async () => {
-        try {
-            const hasHardware = await LocalAuthentication.hasHardwareAsync();
-            if (!hasHardware) {
-                Alert.alert("Error", "Your device doesn't support biometrics");
-                return;
-            }
-            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-            if (!isEnrolled) {
-                Alert.alert("Error", "No biometrics enrolled. Please set up fingerprint in your phone settings.");
-                return;
-            }
-            const result = await LocalAuthentication.authenticateAsync({
-                promptMessage: "Login to Sika",
-                fallbackLabel: "Use password instead",
-                cancelLabel: "Cancel",
-            });
-            if (result.success) {
-                const savedEmail = await AsyncStorage.getItem("sika_user_email");
-                const savedPassword = await AsyncStorage.getItem("sika_user_password");
-                if (savedEmail && savedPassword) {
-                    setLoading(true);
-                    try {
-                        await signInWithEmailAndPassword(auth, savedEmail, savedPassword);
-                        router.replace("/(tabs)/home");
-                    } catch (err: any) {
-                        Alert.alert("Error", "Could not sign in. Please enter your password manually.");
-                    } finally {
-                        setLoading(false);
-                    }
-                } else {
-                    Alert.alert("Error", "No saved session. Please login with email and password first.");
-                }
-            }
-        } catch (error: any) {
-            Alert.alert("Error", error.message);
         }
     };
 
@@ -188,23 +135,6 @@ const Login = () => {
                             </Text>
                         </TouchableOpacity>
 
-                        {/* Biometrics — only show if user has logged in before */}
-                        {hasSavedCredentials && (
-                            <>
-                                <View className="flex-row items-center gap-3 my-4">
-                                    <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
-                                    <Text className="text-gray-400 text-sm">or</Text>
-                                    <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
-                                </View>
-                                <TouchableOpacity
-                                    className="flex-row items-center justify-center py-4 rounded-2xl border border-gray-100 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800"
-                                    onPress={handleBiometricLogin}
-                                >
-                                    <Fingerprint color="#22c55e" size={20} />
-                                    <Text className="text-green-900 dark:text-white font-bold ml-2">Login with Biometrics</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
                     </View>
 
                     {/* Bottom Link */}
