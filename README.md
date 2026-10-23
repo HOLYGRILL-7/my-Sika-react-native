@@ -4,11 +4,13 @@ A personal finance app for people in Ghana that lets you log your income and spe
 
 > "Your money. Your intelligence."
 
+<!--
 ## Screenshots
 
 | Welcome | Home | Transactions | Goals |
 | --- | --- | --- | --- |
 | ![Screen](docs/screenshot-1.png) | ![Screen](docs/screenshot-2.png) | ![Screen](docs/screenshot-3.png) | ![Screen](docs/screenshot-4.png) |
+-->
 
 ## Features
 
