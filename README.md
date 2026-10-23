@@ -95,6 +95,11 @@ hooks/               # colour-scheme hooks
 assets/              # icons, splash and images
 ```
 
+## Security notes
+
+- **The Claude API key is client-side, for demo purposes only.** Any `EXPO_PUBLIC_*` variable is bundled into the app, so anyone with the build can extract `EXPO_PUBLIC_CLAUDE_API_KEY`. A production build would send Sika AI requests through a backend (for example a Firebase Cloud Function) that holds the key and enforces auth and rate limits.
+- Auth sessions are stored with `expo-secure-store`, and user passwords are never stored on the device.
+
 ## Status
 
 **MVP / in development.** The core flows (auth, manual transactions, goals and AI chat) work. SMS sync, cloud sync and several profile settings are not built yet. There are no automated tests.
